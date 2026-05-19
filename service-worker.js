@@ -1,25 +1,27 @@
-const CACHE_NAME = "contact-manager-v1";
+const CACHE = "v1";
 
-const urlsToCache = [
-  "./",
-  "./index.html",
-  "./manifest.json"
-];
+self.addEventListener(
+  "install",
 
-self.addEventListener('install', event => {
+  (e) => {
+    e.waitUntil(
+      caches
+        .open(CACHE)
 
-  event.waitUntil(
+        .then((c) => c.addAll(["./", "index.html"])),
+    );
+  },
+);
 
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-  );
-});
+self.addEventListener(
+  "fetch",
 
-self.addEventListener('fetch', event => {
+  (e) => {
+    e.respondWith(
+      caches
+        .match(e.request)
 
-  event.respondWith(
-
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-  );
-});
+        .then((r) => r || fetch(e.request)),
+    );
+  },
+);

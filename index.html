@@ -1,565 +1,480 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PWA Contact Manager</title>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2563eb">
+    <title>PWA Contact Manager</title>
 
-  <style>
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:Arial, sans-serif;
-    }
+    <link rel="manifest" href="manifest.json" />
 
-    body{
-      background:#f4f6f9;
-      padding:20px;
-    }
+    <meta name="theme-color" content="#2563eb" />
 
-    .topbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:20px;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+    <meta name="apple-mobile-web-app-capable" content="yes" />
 
-    .title{
-      font-size:24px;
-      font-weight:bold;
-    }
+    <meta name="mobile-web-app-capable" content="yes" />
 
-    .btn-group{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    button{
-      border:none;
-      padding:10px 14px;
-      border-radius:8px;
-      cursor:pointer;
-      font-weight:bold;
-      color:white;
-    }
-
-    .sync-btn{
-      background:#2563eb;
-    }
-
-    .import-btn{
-      background:#16a34a;
-    }
-
-    .export-btn{
-      background:#ea580c;
-    }
-
-    .table-container{
-      overflow:auto;
-      background:white;
-      border-radius:12px;
-      padding:10px;
-      box-shadow:0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-    }
-
-    th, td{
-      padding:12px;
-      border-bottom:1px solid #ddd;
-      text-align:left;
-    }
-
-    th{
-      background:#2563eb;
-      color:white;
-      position:sticky;
-      top:0;
-    }
-
-    .fab{
-      position:fixed;
-      right:20px;
-      bottom:20px;
-      width:60px;
-      height:60px;
-      border-radius:50%;
-      font-size:30px;
-      background:#2563eb;
-      color:white;
-      border:none;
-      cursor:pointer;
-      box-shadow:0 4px 10px rgba(0,0,0,0.2);
-    }
-
-    .modal{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,0.5);
-      display:none;
-      justify-content:center;
-      align-items:center;
-      z-index:1000;
-    }
-
-    .modal-content{
-      background:white;
-      padding:20px;
-      border-radius:12px;
-      width:90%;
-      max-width:400px;
-    }
-
-    .modal-content h2{
-      margin-bottom:15px;
-    }
-
-    .modal-content input{
-      width:100%;
-      padding:10px;
-      margin-bottom:12px;
-      border:1px solid #ccc;
-      border-radius:8px;
-    }
-
-    .save-btn{
-      width:100%;
-      background:#2563eb;
-    }
-
-    @media(max-width:600px){
-      th, td{
-        font-size:14px;
-        padding:8px;
+    <style>
+      body {
+        font-family: Arial;
+        margin: 20px;
+        background: #f3f4f6;
       }
-    }
-  </style>
-</head>
 
-<body>
+      .top {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+      }
 
-  <div class="topbar">
-    <div class="title">PWA Contact Manager</div>
+      button {
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        background: #2563eb;
+        color: white;
+      }
 
-    <div class="btn-group">
-      <button class="sync-btn" onclick="syncToDrive()">Sync To Drive</button>
+      table {
+        width: 100%;
+        background: white;
+        border-collapse: collapse;
+      }
 
-      <button class="sync-btn" onclick="fetchFromDrive()">Fetch From Drive</button>
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 10px;
+      }
 
-      <button class="import-btn" onclick="document.getElementById('csvFile').click()">
-        Import CSV
-      </button>
+      th {
+        background: #2563eb;
+        color: white;
+      }
 
-      <button class="export-btn" onclick="exportCSV()">
-        Export CSV
-      </button>
+      .fab {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
 
-      <input type="file" id="csvFile" accept=".csv" hidden>
+        width: 60px;
+        height: 60px;
+
+        border-radius: 50%;
+        font-size: 28px;
+      }
+
+      .modal {
+        display: none;
+
+        position: fixed;
+
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 100%;
+
+        background: rgba(0, 0, 0, 0.5);
+
+        justify-content: center;
+        align-items: center;
+      }
+
+      .box {
+        background: white;
+
+        padding: 20px;
+
+        width: 300px;
+
+        border-radius: 10px;
+      }
+
+      input {
+        width: 100%;
+        padding: 8px;
+
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>PWA Contact Manager</h2>
+
+    <div class="top">
+      <button onclick="syncDrive()">Sync Drive</button>
+
+      <button onclick="fetchDrive()">Fetch Drive</button>
+
+      <button onclick="exportCSV()">Export CSV</button>
+
+      <button onclick="csv.click()">Import CSV</button>
+
+      <input id="csv" type="file" hidden />
     </div>
-  </div>
 
-  <div class="table-container">
     <table>
       <thead>
         <tr>
-          <th>Sl No</th>
+          <th>Sl</th>
+
           <th>Name</th>
-          <th>Contact Number</th>
+
+          <th>Contact</th>
+
           <th>City</th>
         </tr>
       </thead>
 
-      <tbody id="tableBody"></tbody>
+      <tbody id="tbody"></tbody>
     </table>
-  </div>
 
-  <!-- Floating Add Button -->
-  <button class="fab" onclick="openModal()">+</button>
+    <button class="fab" onclick="openModal()">+</button>
 
-  <!-- Modal -->
-  <div class="modal" id="modal">
-    <div class="modal-content">
-      <h2>Add Contact</h2>
+    <div class="modal" id="modal">
+      <div class="box">
+        <input id="name" placeholder="Name" />
 
-      <input type="text" id="name" placeholder="Name">
+        <input id="contact" placeholder="Contact" />
 
-      <input type="text" id="contact" placeholder="Contact Number">
+        <input id="city" placeholder="City" />
 
-      <input type="text" id="city" placeholder="City">
-
-      <button class="save-btn" onclick="saveContact()">Save</button>
+        <button onclick="saveData()">Save</button>
+      </div>
     </div>
-  </div>
 
-<script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  // =========================
-  // PWA SERVICE WORKER
-  // =========================
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("service-worker.js");
+      }
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js');
-  }
+      let db;
 
-  // =========================
-  // INDEXED DB
-  // =========================
+      let accessToken = localStorage.getItem("driveToken") || "";
 
-  let db;
+      let expiry = Number(localStorage.getItem("driveExpiry")) || 0;
 
-  const request = indexedDB.open("ContactDB", 1);
+      const CLIENT_ID = "1052784534817-j81960tfqri6j1gv4at83rr8f460hm19.apps.googleusercontent.com";
 
-  request.onupgradeneeded = function(e){
-    db = e.target.result;
+      const open = indexedDB.open("ContactDB", 1);
 
-    if(!db.objectStoreNames.contains("contacts")){
-      const store = db.createObjectStore("contacts", {
-        keyPath:"uuid"
-      });
+      open.onupgradeneeded = (e) => {
+        db = e.target.result;
 
-      store.createIndex("name", "name", {unique:false});
-    }
-  };
+        db.createObjectStore(
+          "contacts",
 
-  request.onsuccess = function(e){
-    db = e.target.result;
-    loadContacts();
-  };
-
-  request.onerror = function(){
-    alert("IndexedDB Error");
-  };
-
-  // =========================
-  // MODAL
-  // =========================
-
-  function openModal(){
-    document.getElementById('modal').style.display='flex';
-  }
-
-  function closeModal(){
-    document.getElementById('modal').style.display='none';
-  }
-
-  // =========================
-  // SAVE CONTACT
-  // =========================
-
-  function saveContact(){
-
-    const name = document.getElementById('name').value.trim();
-    const contact = document.getElementById('contact').value.trim();
-    const city = document.getElementById('city').value.trim();
-
-    if(!name || !contact || !city){
-      alert("Please fill all fields");
-      return;
-    }
-
-    const tx = db.transaction("contacts", "readwrite");
-    const store = tx.objectStore("contacts");
-
-    const contactData = {
-      uuid: crypto.randomUUID(),
-      name,
-      contact,
-      city,
-      updatedAt: Date.now()
-    };
-
-    store.put(contactData);
-
-    tx.oncomplete = function(){
-
-      closeModal();
-
-      document.getElementById('name').value='';
-      document.getElementById('contact').value='';
-      document.getElementById('city').value='';
-
-      loadContacts();
-    };
-  }
-
-  // =========================
-  // LOAD CONTACTS
-  // =========================
-
-  function loadContacts(){
-
-    const tbody = document.getElementById('tableBody');
-    tbody.innerHTML='';
-
-    const tx = db.transaction("contacts", "readonly");
-    const store = tx.objectStore("contacts");
-
-    const request = store.getAll();
-
-    request.onsuccess = function(){
-
-      const data = request.result;
-
-      data.forEach((item, index)=>{
-
-        tbody.innerHTML += `
-          <tr>
-            <td>${index + 1}</td>
-            <td>${item.name}</td>
-            <td>${item.contact}</td>
-            <td>${item.city}</td>
-          </tr>
-        `;
-      });
-    };
-  }
-
-  // =========================
-  // EXPORT CSV
-  // =========================
-
-  function exportCSV(){
-
-    const tx = db.transaction("contacts", "readonly");
-    const store = tx.objectStore("contacts");
-
-    const request = store.getAll();
-
-    request.onsuccess = function(){
-
-      const data = request.result;
-
-      let csv = "Name,Contact,City\n";
-
-      data.forEach(item=>{
-        csv += `${item.name},${item.contact},${item.city}\n`;
-      });
-
-      const blob = new Blob([csv], {type:'text/csv'});
-
-      const a = document.createElement('a');
-
-      a.href = URL.createObjectURL(blob);
-      a.download = "contacts.csv";
-      a.click();
-    };
-  }
-
-  // =========================
-  // IMPORT CSV
-  // =========================
-
-  document.getElementById('csvFile')
-    .addEventListener('change', function(e){
-
-    const file = e.target.files[0];
-
-    if(!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = function(event){
-
-      const text = event.target.result;
-
-      const rows = text.split('\n').slice(1);
-
-      const tx = db.transaction("contacts", "readwrite");
-      const store = tx.objectStore("contacts");
-
-      rows.forEach(row=>{
-
-        if(!row.trim()) return;
-
-        const cols = row.split(',');
-
-        store.put({
-          uuid: crypto.randomUUID(),
-          name: cols[0] || '',
-          contact: cols[1] || '',
-          city: cols[2] || '',
-          updatedAt: Date.now()
-        });
-      });
-
-      tx.oncomplete = function(){
-        loadContacts();
-        alert("CSV Imported");
-      };
-    };
-
-    reader.readAsText(file);
-  });
-
-  // =========================
-  // GOOGLE DRIVE SYNC
-  // =========================
-
-  /*
-    IMPORTANT:
-
-    Replace below CLIENT_ID with your own Google OAuth Client ID.
-
-    Enable:
-    Google Drive API
-
-    OAuth scope:
-    https://www.googleapis.com/auth/drive.file
-  */
-
-  const CLIENT_ID = "1052784534817-j81960tfqri6j1gv4at83rr8f460hm19.apps.googleusercontent.com";
-
-  let accessToken = "";
-
-  async function authenticate(){
-
-    return new Promise((resolve)=>{
-
-      google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope:'https://www.googleapis.com/auth/drive.file',
-
-        callback:(tokenResponse)=>{
-
-          accessToken = tokenResponse.access_token;
-          resolve();
-        }
-
-      }).requestAccessToken();
-    });
-  }
-
-  // =========================
-  // SYNC TO DRIVE
-  // =========================
-
-  async function syncToDrive(){
-
-    if(!CLIENT_ID || CLIENT_ID === "YOUR_GOOGLE_CLIENT_ID"){
-      alert("Please add Google Client ID");
-      return;
-    }
-
-    await authenticate();
-
-    const tx = db.transaction("contacts", "readonly");
-    const store = tx.objectStore("contacts");
-
-    const request = store.getAll();
-
-    request.onsuccess = async function(){
-
-      const data = request.result;
-
-      const blob = new Blob(
-        [JSON.stringify(data)],
-        {type:'application/json'}
-      );
-
-      const metadata = {
-        name:"contacts_backup.json",
-        mimeType:"application/json"
-      };
-
-      const form = new FormData();
-
-      form.append(
-        'metadata',
-        new Blob([JSON.stringify(metadata)], {type:'application/json'})
-      );
-
-      form.append('file', blob);
-
-      const response = await fetch(
-        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
-        {
-          method:'POST',
-          headers:{
-            Authorization:'Bearer ' + accessToken
+          {
+            keyPath: "uuid",
           },
-          body:form
-        }
-      );
+        );
+      };
 
-      if(response.ok){
-        alert("Synced to Google Drive");
-      }else{
-        alert("Drive Sync Failed");
+      open.onsuccess = (e) => {
+        db = e.target.result;
+
+        load();
+      };
+
+      function tx(mode) {
+        return db.transaction("contacts", mode).objectStore("contacts");
       }
-    };
-  }
 
-  // =========================
-  // FETCH FROM DRIVE
-  // =========================
-
-  async function fetchFromDrive(){
-
-    if(!CLIENT_ID || CLIENT_ID === "YOUR_GOOGLE_CLIENT_ID"){
-      alert("Please add Google Client ID");
-      return;
-    }
-
-    await authenticate();
-
-    const search = await fetch(
-      "https://www.googleapis.com/drive/v3/files?q=name='contacts_backup.json'",
-      {
-        headers:{
-          Authorization:'Bearer ' + accessToken
-        }
+      function openModal() {
+        modal.style.display = "flex";
       }
-    );
 
-    const result = await search.json();
-
-    if(!result.files || result.files.length === 0){
-      alert("Backup file not found");
-      return;
-    }
-
-    const fileId = result.files[0].id;
-
-    const fileResponse = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
-      {
-        headers:{
-          Authorization:'Bearer ' + accessToken
-        }
+      function closeModal() {
+        modal.style.display = "none";
       }
-    );
 
-    const data = await fileResponse.json();
+      function saveData() {
+        const data = {
+          uuid: crypto.randomUUID(),
 
-    const tx = db.transaction("contacts", "readwrite");
-    const store = tx.objectStore("contacts");
+          name: name.value,
 
-    data.forEach(item=>{
-      store.put(item);
-    });
+          contact: contact.value,
 
-    tx.oncomplete = function(){
-      loadContacts();
-      alert("Data Restored From Drive");
-    };
-  }
+          city: city.value,
 
-</script>
+          updated: Date.now(),
+        };
 
-<!-- GOOGLE API -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+        tx("readwrite").put(data);
 
-</body>
+        closeModal();
+
+        setTimeout(load, 100);
+      }
+
+      function load() {
+        tbody.innerHTML = "";
+
+        tx("readonly").getAll().onsuccess = (e) => {
+          e.target.result
+
+            .sort((a, b) => b.updated - a.updated)
+
+            .forEach((x, i) => {
+              tbody.innerHTML += `
+
+<tr>
+
+<td>
+${i + 1}
+</td>
+
+<td>
+${x.name}
+</td>
+
+<td>
+${x.contact}
+</td>
+
+<td>
+${x.city}
+</td>
+
+</tr>
+
+`;
+            });
+        };
+      }
+
+      function exportCSV() {
+        tx("readonly").getAll().onsuccess = (e) => {
+          let csv = "Name,Contact,City\n";
+
+          e.target.result.forEach((x) => {
+            csv += `${x.name},
+${x.contact},
+${x.city}\n`;
+          });
+
+          const blob = new Blob([csv]);
+
+          const a = document.createElement("a");
+
+          a.href = URL.createObjectURL(blob);
+
+          a.download = "contacts.csv";
+
+          a.click();
+        };
+      }
+
+      csv.onchange = (e) => {
+        const file = e.target.files[0];
+
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = (x) => {
+          const rows = x.target.result
+
+            .split("\n")
+
+            .slice(1);
+
+          const store = tx("readwrite");
+
+          rows.forEach((r) => {
+            if (!r) return;
+
+            const c = r.split(",");
+
+            store.put({
+              uuid: crypto.randomUUID(),
+
+              name: c[0],
+
+              contact: c[1],
+
+              city: c[2],
+
+              updated: Date.now(),
+            });
+          });
+
+          setTimeout(load, 500);
+        };
+
+        reader.readAsText(file);
+      };
+
+      async function auth() {
+        if (accessToken && Date.now() < expiry) {
+          return;
+        }
+
+        return new Promise((resolve) => {
+          google.accounts.oauth2
+
+            .initTokenClient({
+              client_id: CLIENT_ID,
+
+              scope: "https://www.googleapis.com/auth/drive.file",
+
+              callback: (r) => {
+                accessToken = r.access_token;
+
+                expiry = Date.now() + r.expires_in * 1000;
+
+                localStorage.setItem(
+                  "driveToken",
+
+                  accessToken,
+                );
+
+                localStorage.setItem(
+                  "driveExpiry",
+
+                  expiry,
+                );
+
+                resolve();
+              },
+            })
+
+            .requestAccessToken();
+        });
+      }
+
+      async function fileId() {
+        const r = await fetch(
+          "https://www.googleapis.com/drive/v3/files?q=name='contacts_backup.json'",
+
+          {
+            headers: {
+              Authorization: "Bearer " + accessToken,
+            },
+          },
+        );
+
+        const j = await r.json();
+
+        if (j.files && j.files.length) {
+          return;
+
+          j.files[0].id;
+        }
+
+        return null;
+      }
+
+      async function syncDrive() {
+        await auth();
+
+        tx("readonly").getAll().onsuccess = async (e) => {
+          const data = JSON.stringify(e.target.result);
+
+          const id = await fileId();
+
+          const meta = {
+            name: "contacts_backup.json",
+          };
+
+          const form = new FormData();
+
+          form.append(
+            "metadata",
+
+            new Blob(
+              [JSON.stringify(meta)],
+
+              {
+                type: "application/json",
+              },
+            ),
+          );
+
+          form.append(
+            "file",
+
+            new Blob(
+              [data],
+
+              {
+                type: "application/json",
+              },
+            ),
+          );
+
+          let url = "https://www.googleapis.com/upload/drive/v3/files";
+
+          let method = "POST";
+
+          if (id) {
+            url += "/" + id + "?uploadType=multipart";
+
+            method = "PATCH";
+          } else {
+            url += "?uploadType=multipart";
+          }
+
+          await fetch(
+            url,
+
+            {
+              method,
+
+              headers: {
+                Authorization: "Bearer " + accessToken,
+              },
+
+              body: form,
+            },
+          );
+
+          alert("Synced");
+        };
+      }
+
+      async function fetchDrive() {
+        await auth();
+
+        const id = await fileId();
+
+        if (!id) {
+          alert("No backup");
+
+          return;
+        }
+
+        const r = await fetch(
+          `https://www.googleapis.com/drive/v3/files/${id}?alt=media`,
+
+          {
+            headers: {
+              Authorization: "Bearer " + accessToken,
+            },
+          },
+        );
+
+        const data = await r.json();
+
+        const store = tx("readwrite");
+
+        data.forEach((x) => store.put(x));
+
+        setTimeout(
+          load,
+
+          500,
+        );
+
+        alert("Fetched");
+      }
+    </script>
+  </body>
 </html>
